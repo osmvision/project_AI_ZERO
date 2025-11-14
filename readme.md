@@ -8,6 +8,8 @@ hardware: nvidia-t4-small
 app_port: 7860
 ---
 
+
+
 # 🚀 Projet : Assistant RAG Vocal avec IA Locale
 
 Ce projet est une application web complète (FastAPI + HTML/JS) qui permet à un utilisateur de poser des questions vocalement à une base de documents.
