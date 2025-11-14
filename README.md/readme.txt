@@ -43,3 +43,15 @@ L'ensemble du pipeline (S2T, Embedding, LLM) tourne localement.
 
 6.  **Accéder à l'application :**
     * Ouvrez `http://127.0.0.1:8000/` dans votre navigateur.
+    ---
+title: Assistant RAG Vocal
+emoji: 🚀
+colorFrom: blue
+colorTo: purple
+sdk: docker
+hardware: nvidia-t4-small # C'est la demande pour le GPU T4 (NVIDIA)
+app_port: 7860 # Indique à HF que notre app tourne sur le port 7860
+---
+
+# 🚀 Projet : Assistant RAG Vocal avec IA Locale
+(Votre README existant continue ici...)
