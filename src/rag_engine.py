@@ -48,7 +48,10 @@ def setup_rag_engine():
         print("⚠️ Index RAG non trouvé. Démarrage de la construction...")
         index = build_rag_index()
         
-    return index.as_query_engine(similarity_top_k=TOP_K_CHUNKS)
+    return index.as_chat_engine(
+        chat_mode="context", 
+        verbose=True  # Pratique pour voir ce que fait l'IA dans le terminal
+    )
 
 
 def build_rag_index():

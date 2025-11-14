@@ -200,45 +200,42 @@
             align-items: center;
             gap: 20px;
         }
+        
+        /* --- Style générique pour les boutons ronds --- */
+        .control-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: grid;
+            place-items: center;
+        }
+        .control-button:hover:not(:disabled) {
+            transform: scale(1.1);
+        }
+
         /* Bouton d'enregistrement futuriste */
         #recordButton {
             width: 80px;
             height: 80px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
             font-size: 2rem;
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             position: relative;
             box-shadow: 0 0 30px rgba(245, 87, 108, 0.5);
         }
         #recordButton::before {
             content: '';
             position: absolute;
-            top: -5px;
-            left: -5px;
-            right: -5px;
-            bottom: -5px;
+            top: -5px; left: -5px; right: -5px; bottom: -5px;
             border-radius: 50%;
             border: 2px solid transparent;
             background: linear-gradient(135deg, #f093fb, #f5576c) border-box;
             -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-            /* ... (dans #recordButton::before) ... */
-
-background: linear-gradient(135deg, #f093fb, #f5576c) border-box;
-
-/* Pour Safari/Chrome */
--webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-
-/* AJOUTEZ CECI : La version standard pour la compatibilité */
-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-
--webkit-mask-composite: xor;
-mask-composite: exclude;
-
-/* ... (reste du code) ... */
+            mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); /* Correction compatibilité */
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             opacity: 0;
@@ -263,26 +260,26 @@ mask-composite: exclude;
             0%, 100% { box-shadow: 0 0 30px rgba(245, 87, 108, 0.5); }
             50% { box-shadow: 0 0 60px rgba(245, 87, 108, 1); }
         }
-        #stopButton {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+
+        /* Bouton Stop et Reset */
+        #stopButton, #resetButton {
             border: 2px solid rgba(255, 255, 255, 0.3);
-            cursor: pointer;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            color: white;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
         }
-        #stopButton:hover:not(:disabled) {
+        #resetButton {
+            background: linear-gradient(135deg, #3b82f6, #667eea); /* Bleu pour Reset */
+            border: none;
+            font-size: 1.8rem;
+        }
+        #stopButton:hover:not(:disabled), #resetButton:hover:not(:disabled) {
             background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
         }
         #stopButton:disabled {
             opacity: 0.3;
             cursor: not-allowed;
         }
+
         #status {
             color: #a0a0b0;
             flex-grow: 1;
@@ -336,8 +333,10 @@ mask-composite: exclude;
                 </div>
             </div>
             <div id="controls">
-                <button id="recordButton" title="Enregistrer">🎤</button>
-                <button id="stopButton" title="Arrêter" disabled>⏹️</button>
+                <button id="recordButton" class="control-button" title="Enregistrer">🎤</button>
+                <button id="stopButton" class="control-button" title="Arrêter" disabled>⏹️</button>
+                <button id="resetButton" class="control-button" title="Nouvelle Conversation">🔄</button>
+                
                 <div id="status">
                     <span class="status-indicator"></span>
                     Prêt à enregistrer...
@@ -350,7 +349,6 @@ mask-composite: exclude;
         // Créer des particules animées
         function createParticles() {
             const bg = document.getElementById('particles-bg');
-            // Réduit le nombre pour la performance, mais vous pouvez l'augmenter
             for (let i = 0; i < 20; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
@@ -366,6 +364,7 @@ mask-composite: exclude;
 
         const recordButton = document.getElementById('recordButton');
         const stopButton = document.getElementById('stopButton');
+        const resetButton = document.getElementById('resetButton'); // <-- NOUVEAU
         const statusDiv = document.getElementById('status');
         const conversationDiv = document.getElementById('conversation');
         
@@ -387,10 +386,10 @@ mask-composite: exclude;
         }
         recordButton.addEventListener('click', createRipple);
         stopButton.addEventListener('click', createRipple);
+        resetButton.addEventListener('click', createRipple); // <-- NOUVEAU
 
         // Démarrer l'enregistrement
         recordButton.onclick = async () => {
-            // *** INTÉGRATION TTS : Arrête la parole si l'IA parle ***
             speechSynthesis.cancel();
             
             try {
@@ -443,8 +442,7 @@ mask-composite: exclude;
                     addMessage(result.transcribed_text, "user");
                     updateMessage(loadingBubble, result.answer_rag, "bot");
                     
-                    // *** INTÉGRATION TTS : Fait parler l'IA ***
-                    parler(result.answer_rag);
+                    parler(result.answer_rag); // TTS
                     
                     statusDiv.innerHTML = '<span class="status-indicator"></span>Prêt à enregistrer...';
                 } else {
@@ -455,13 +453,37 @@ mask-composite: exclude;
                 const errorMsg = `Désolé, une erreur est survenue: ${err.message}`;
                 updateMessage(loadingBubble, errorMsg, "bot", true);
                 
-                // *** INTÉGRATION TTS : Lit l'erreur à voix haute ***
-                parler(errorMsg);
+                parler(errorMsg); // TTS Erreur
                 
                 statusDiv.innerHTML = '<span class="status-indicator" style="background: #ef4444; box-shadow: 0 0 10px #ef4444;"></span>Erreur. Prêt à réessayer.';
             }
         }
 
+        // --- NOUVELLE FONCTION : RÉINITIALISER LE CHAT ---
+        resetButton.onclick = async () => {
+            speechSynthesis.cancel(); // Arrête la parole
+            try {
+                const response = await fetch('/reset_chat'); // Appelle l'API de reset
+                
+                if (response.ok) {
+                    conversationDiv.innerHTML = ""; // Vide l'interface
+                    
+                    // Ajoute le message de bienvenue
+                    addMessage("Bonjour ! Posez-moi une question vocale sur les documents. Je suis prêt à vous aider ! 🎯", "bot");
+                    
+                    statusDiv.innerHTML = '<span class="status-indicator"></span>Mémoire réinitialisée. Prêt.';
+                    console.log("Chat reset OK");
+                } else {
+                    throw new Error("Échec de la réinitialisation du serveur.");
+                }
+            } catch (err) {
+                console.error("Erreur de réinitialisation:", err);
+                statusDiv.innerHTML = '<span class="status-indicator" style="background: #ef4444; box-shadow: 0 0 10px #ef4444;"></span>Erreur de reset.';
+            }
+        };
+
+        // --- FONCTIONS D'AIDE ---
+        
         function addMessage(text, speaker, extraClass = "") {
             const messageType = (speaker === 'user') ? 'user-message' : 'bot-message';
             const speakerName = (speaker === 'user') ? '🗣️ VOUS' : '🤖 IA RAG';
@@ -491,18 +513,11 @@ mask-composite: exclude;
             conversationDiv.scrollTop = conversationDiv.scrollHeight;
         }
 
-        // *** NOUVELLE FONCTION TTS (Text-to-Speech) ***
+        // --- FONCTION TTS (Text-to-Speech) ---
         function parler(texte) {
-            // Arrête toute parole précédente au cas où
             speechSynthesis.cancel();
-
-            // Crée un objet pour la synthèse vocale
             const utterance = new SpeechSynthesisUtterance(texte);
-            
-            // On s'assure qu'elle parle en français
             utterance.lang = 'fr-FR'; 
-            
-            // Demande au navigateur de parler
             speechSynthesis.speak(utterance);
         }
 
