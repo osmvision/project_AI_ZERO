@@ -1,0 +1,9 @@
+Produit : Logiciel Alpha-Connect (Alpha-C)
+Responsable du Projet : Madame Dubois (Chef de Produit)
+
+Phase 1 : Développement et Tests (Janvier 2026 - Avril 2026). Le budget alloué à cette phase est de 50 000 euros.
+Phase 2 : Alpha-Test Interne (Mai 2026). L'équipe de Monsieur Martin gère l'assurance qualité.
+Phase 3 : Bêta-Test Public (Juin 2026). L'objectif est de recruter 500 utilisateurs externes.
+Phase 4 : Lancement Commercial (1er Septembre 2026). Le prix de lancement est fixé à 49€ par mois.
+
+L'équipe de soutien technique, sous la direction de M. Sanchez, sera opérationnelle à partir du 15 août. La première réunion de planification marketing aura lieu le 15 décembre 2025.

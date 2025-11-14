@@ -1,0 +1,26 @@
+# --- Environnement Virtuel ---
+.venv/
+*.pyc
+__pycache__/
+
+# --- Index RAG (TRÈS IMPORTANT) ---
+# Ce dossier contient vos vecteurs et peut être très volumineux
+/storage/
+
+# --- Modèles et Caches ---
+# Cache LlamaIndex
+/cache/
+# Cache HuggingFace
+*.safetensors
+*.bin
+
+# --- Fichiers Temporaires ---
+# Le fichier audio temporaire de FastAPI
+temp_audio.mp3
+*.log
+
+# --- Fichiers de configuration VSCode ---
+.vscode/
+
+# --- Fichiers système ---
+.DS_Store

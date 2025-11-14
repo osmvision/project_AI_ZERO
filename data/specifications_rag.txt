@@ -1,0 +1,14 @@
+Titre : Spécifications Techniques du Projet ZEROAI RAG Vocal
+
+1. Objectif Principal : Convertir une question vocale en réponse textuelle en utilisant une base de documents interne.
+
+2. Composants Clés :
+   - Speech-to-Text (S2T) : Utilisé le modèle Whisper ('base') pour la rapidité.
+   - Framework RAG : Implémenté via LlamaIndex pour la gestion des vecteurs et des chunks.
+   - API Web : FastAPI est utilisé comme orchestrateur et point d'entrée HTTP (/query_voice).
+
+3. Base de Connaissances : Le corpus de documents est stocké dans le dossier /data. L'index (vecteurs) est sauvegardé dans /storage pour éviter la reconstruction à chaque démarrage.
+
+4. Déploiement : Le projet est destiné à être conteneurisé via Docker pour un hébergement futur sur Google Cloud Run.
+
+5. Sécurité : Les clés API (OpenAI, Gemini) doivent être stockées dans un fichier .env et ne jamais être ajoutées au dépôt Git.
