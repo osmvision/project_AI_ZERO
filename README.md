@@ -4,12 +4,11 @@ emoji: 🚀
 colorFrom: blue
 colorTo: purple
 sdk: docker
-hardware: nvidia-t4-small
 app_port: 7860
 ---
 
 
-
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 # 🚀 Projet : Assistant RAG Vocal avec IA Locale
 
 Ce projet est une application web complète (FastAPI + HTML/JS) qui permet à un utilisateur de poser des questions vocalement à une base de documents.
