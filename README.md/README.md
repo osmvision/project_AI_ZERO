@@ -1,11 +1,23 @@
 ﻿---
-title: Assistant RAG Vocal
+title: Project Zero AI
 emoji: 🚀
 colorFrom: blue
-colorTo: purple
+colorTo: green
 sdk: docker
-app_port: 7860
+pinned: false
 ---
+
+# Project Zero AI - Moteur RAG Vocal
+
+Ce projet est une application de Question/Réponse basée sur la récupération d'informations (RAG) qui accepte des requêtes vocales.
+
+## Architecture
+- **API**: FastAPI
+- **Speech-to-Text**: `openai-whisper`
+- **Moteur RAG**: `LlamaIndex` avec `Ollama` et `llama3`
+- **Déploiement**: Docker
+
+Le projet est orchestré par un script `boot.sh` qui initialise le serveur Ollama avant de lancer l'application FastAPI.
 
 ````plaintext
 #  Projet : Assistant RAG Vocal avec IA Locale
