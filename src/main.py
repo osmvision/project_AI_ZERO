@@ -1,4 +1,4 @@
-# /src/main.py
+
 
 from fastapi import FastAPI, UploadFile, File
 import shutil
@@ -23,16 +23,19 @@ class TextQuery(BaseModel):
 async def get_frontend():
     """Sert la page web principale (votre interface utilisateur)."""
     return FileResponse("index.html")
+# ... (Imports inchangés)
 
-# --- API POUR LA VOIX (Inchangée) ---
+# --- API POUR LA VOIX (Corrigée) ---
+# On retire 'async' ici pour que FastAPI utilise un thread séparé
 @app.post("/query_voice")
-async def query_voice(audio_file: UploadFile = File(...)):
+def query_voice(audio_file: UploadFile = File(...)): 
     """
     Accepte un fichier audio, le transcrit, et interroge le moteur RAG.
     """
-    temp_file_path = Path("temp_audio.mp3") 
+    temp_file_path = Path("temp_audio.mp3")
     
     try:
+        # Note: shutil.copyfileobj est bloquant, donc c'est bien d'être dans un 'def' standard
         with temp_file_path.open("wb") as buffer:
             shutil.copyfileobj(audio_file.file, buffer)
         
@@ -42,6 +45,8 @@ async def query_voice(audio_file: UploadFile = File(...)):
             return {"error": question_text, "status": "failed"}
 
         print(f"🧠 Interrogation (Chat) du RAG avec: {question_text}")
+        
+        # Cette ligne bloquait tout ! Maintenant elle tourne dans un thread.
         response = RAG_ENGINE.chat(question_text) 
         
         return {
@@ -49,14 +54,15 @@ async def query_voice(audio_file: UploadFile = File(...)):
             "transcribed_text": question_text,
             "answer_rag": str(response)
         }
-        
+            
     except Exception as e:
         print(f"Erreur d'orchestration (voix): {e}")
         return {"error": f"Une erreur s'est produite: {e}", "status": "failed"}
 
-# --- NOUVEAU POINT DE TERMINAISON POUR LE TEXTE ---
+# --- API POUR LE TEXTE (Corrigée) ---
+# On retire 'async' ici aussi
 @app.post("/query_text")
-async def query_text(query: TextQuery):
+def query_text(query: TextQuery):
     """
     Accepte une question textuelle et interroge le moteur RAG.
     """
@@ -67,16 +73,18 @@ async def query_text(query: TextQuery):
             
         print(f"🧠 Interrogation (Chat) du RAG avec: {question_text}")
         
-        # Utilise le MÊME moteur de chat pour garder la mémoire
+        # Le calcul lourd se fait ici
         response = RAG_ENGINE.chat(question_text) 
         
         return {
-            "transcribed_text": question_text, # Renvoyé pour l'affichage
+            "transcribed_text": question_text,
             "answer_rag": str(response)
         }
     except Exception as e:
         print(f"Erreur d'orchestration (texte): {e}")
         return {"error": f"Une erreur s'est produite: {e}", "status": "failed"}
+
+
 
 # --- API POUR LE RESET (Inchangée) ---
 @app.get("/reset_chat")
