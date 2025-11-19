@@ -1,7 +1,18 @@
 fastapi
-uvicorn
+uvicorn[standard]
+python-multipart
 requests
-sentence-transformers
-llama-index
-llama-index-embeddings-huggingface
+# C'est ici que ça se joue :
+openai-whisper
+# Dépendances nécessaires pour le RAG
+llama-index-core
 llama-index-llms-ollama
+llama-index-embeddings-huggingface
+sentence-transformers
+# Dépendances système pour le son et l'IA
+torch
+torchaudio
+transformers
+huggingface-hub
+accelerate
+tiktoken
