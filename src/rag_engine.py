@@ -1,28 +1,28 @@
-# /src/rag_engine.py
-
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.core import StorageContext, load_index_from_storage
-from llama_index.core import Settings  # <-- NOUVEAU
-from llama_index.llms.ollama import Ollama  # <-- NOUVEAU
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding  # <-- NOUVEAU
+from llama_index.core import Settings  
+from llama_index.llms.ollama import Ollama  
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding  
 import os
 from pathlib import Path
 
 # --- Configuration des Modèles (LA SECTION IMPORTANTE) ---
-# Nous disons à LlamaIndex d'utiliser nos modèles locaux gratuits
-# au lieu des modèles payants d'OpenAI.
+# Nous disons à LlamaIndex d'utiliser nos modèles locaux gratuits.
 
 print("Configuration des modèles locaux (LLM et Embedding)...")
 
 # 1. Configurer le LLM (via Ollama)
-Settings.llm = Ollama(model="llama3", request_timeout=60.0)
+# CORRECTION ICI : Passage de 60.0 à 360.0 (6 minutes)
+Settings.llm = Ollama(
+    model="llama3", 
+    request_timeout=360.0 
+)
 
 # 2. Configurer le Modèle d'Embedding (via HuggingFace)
 Settings.embed_model = HuggingFaceEmbedding(
     model_name="BAAI/bge-small-en-v1.5"
 )
 
-# Remarque : La première exécution téléchargera le modèle 'bge-small-en-v1.5'.
 # ---------------------------------------------------------
 
 
