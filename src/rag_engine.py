@@ -36,7 +36,6 @@ except TypeError:
     # Certaines versions de la classe n'acceptent pas model_kwargs
     Settings.embed_model = HuggingFaceEmbedding(model_name=embed_model_name)
     print(f"Using embedding model: {embed_model_name} (no model_kwargs support)")
-
 # ---------------------------------------------------------
 
 
