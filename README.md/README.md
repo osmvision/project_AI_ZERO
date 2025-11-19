@@ -1,4 +1,13 @@
-﻿````plaintext
+﻿---
+title: Assistant RAG Vocal
+emoji: 🚀
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 7860
+---
+
+````plaintext
 #  Projet : Assistant RAG Vocal avec IA Locale
 
 Ce projet est une application web complète (FastAPI + HTML/JS) qui permet à un utilisateur de poser des questions vocalement à une base de documents.

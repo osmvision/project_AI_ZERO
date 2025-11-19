@@ -67,7 +67,9 @@
             font-size: 2.2rem; 
             text-transform: uppercase; 
             background: linear-gradient(90deg, #fff, var(--primary), #fff); 
-            -webkit-background-clip: text; 
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
             -webkit-text-fill-color: transparent; 
             text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
             letter-spacing: 4px;
@@ -241,6 +243,11 @@
     </div>
 
     <script>
+        // ==========================================
+        // ⚠️ CONFIGURATION SERVEUR RENDER ⚠️
+        // ==========================================
+        const BASE_URL = "https://ai-zero-by-oussama-abid.onrender.com";
+
         // --- GESTION DU FOND (PARTICULES) ---
         const bg = document.getElementById('background-layer');
         for(let i=0; i<30; i++){
@@ -349,18 +356,25 @@
             addMessage(txt, "user");
             textInput.value = "";
             
-            await sendRequest('/query_text', JSON.stringify({ text: txt }), 'application/json');
+            // Utilisation de BASE_URL
+            await sendRequest(BASE_URL + '/query_text', JSON.stringify({ text: txt }), 'application/json');
         }
 
         sendButton.onclick = handleTextSubmit;
         textInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') handleTextSubmit(); });
 
-        // --- LOGIQUE RESET ---
+        // --- LOGIQUE RESET (CORRIGÉE) ---
         resetButton.addEventListener('click', async () => {
             speechSynthesis.cancel();
             conversationDiv.innerHTML = '';
-            await fetch('/reset_chat');
-            addMessage("Mémoire purgée. Système prêt.", "bot");
+            
+            try {
+                // ⚠️ CORRECTION ICI : Ajout de BASE_URL
+                await fetch(BASE_URL + '/reset_chat');
+                addMessage("Mémoire purgée. Système prêt.", "bot");
+            } catch (e) {
+                addMessage("Erreur lors du reset : " + e.message, "bot");
+            }
         });
 
         // --- ENVOI SERVEUR (GÉNÉRIQUE) ---
@@ -368,7 +382,9 @@
             const blob = new Blob(audioChunks, { type: 'audio/webm' });
             const formData = new FormData();
             formData.append("audio_file", blob, "voice.webm");
-            await sendRequest('/query_voice', formData);
+            
+            // Utilisation de BASE_URL
+            await sendRequest(BASE_URL + '/query_voice', formData);
         }
 
         async function sendRequest(url, bodyData, contentType = null) {
