@@ -372,7 +372,7 @@
             await sendRequest('/query_voice', formData);
         }
 
-        // --- C'EST ICI QUE J'AI CORRIGÉ LE BUG ---
+        // --- PARTIE MODIFIÉE (INVISIBLE) POUR ÉVITER LE CRASH ---
         async function sendRequest(url, bodyData, contentType = null) {
             setStatus("Traitement RAG en cours...", "busy");
             
@@ -385,24 +385,19 @@
                 
                 const response = await fetch(url, opts);
 
-                // --- NOUVELLE LOGIQUE DE SÉCURITÉ ---
-                // On vérifie d'abord si la réponse est valide avant de parser le JSON
+                // Protection contre le crash JSON
                 if (!response.ok) {
-                    // Si c'est une erreur (500, 404), on essaie de lire le texte de l'erreur
                     const errorText = await response.text();
-                    throw new Error(`Erreur Serveur (${response.status}): ${errorText.substring(0, 100)}...`);
+                    throw new Error(`Erreur Serveur (${response.status}): ${errorText.substring(0, 50)}...`);
                 }
 
-                // On vérifie que le contenu est bien du JSON
+                // On vérifie si le serveur renvoie bien du JSON
                 const contentTypeHeader = response.headers.get("content-type");
                 if (!contentTypeHeader || !contentTypeHeader.includes("application/json")) {
-                     // Si le serveur renvoie du HTML au lieu de JSON (le bug "Unexpected token <")
                     const text = await response.text();
-                    console.error("Réponse HTML reçue au lieu de JSON:", text);
-                    throw new Error("Le serveur a renvoyé une page HTML (Erreur critique ou démarrage en cours)");
+                    throw new Error("Erreur: Le serveur n'est pas prêt ou a renvoyé une page HTML.");
                 }
 
-                // Maintenant c'est sûr, on peut parser
                 const data = await response.json();
                 
                 loadingMsg.remove(); // On retire le message de chargement
@@ -416,7 +411,8 @@
             } catch (err) {
                 loadingMsg.remove();
                 console.error(err);
-                addMessage("⚠️ Erreur : " + err.message, "bot");
+                // Affiche l'erreur dans le style du chat au lieu de planter
+                addMessage("⚠️ " + err.message, "bot");
                 setStatus("Erreur", "error");
             }
         }
