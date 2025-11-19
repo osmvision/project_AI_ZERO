@@ -1,28 +1,42 @@
-# /src/rag_engine.py
-
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.core import StorageContext, load_index_from_storage
-from llama_index.core import Settings  # <-- NOUVEAU
-from llama_index.llms.ollama import Ollama  # <-- NOUVEAU
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding  # <-- NOUVEAU
+from llama_index.core import Settings  
+from llama_index.llms.ollama import Ollama  
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding  
 import os
 from pathlib import Path
 
 # --- Configuration des Modèles (LA SECTION IMPORTANTE) ---
-# Nous disons à LlamaIndex d'utiliser nos modèles locaux gratuits
-# au lieu des modèles payants d'OpenAI.
+# Nous disons à LlamaIndex d'utiliser nos modèles locaux gratuits.
 
 print("Configuration des modèles locaux (LLM et Embedding)...")
 
 # 1. Configurer le LLM (via Ollama)
-Settings.llm = Ollama(model="llama3", request_timeout=60.0)
-
-# 2. Configurer le Modèle d'Embedding (via HuggingFace)
-Settings.embed_model = HuggingFaceEmbedding(
-    model_name="BAAI/bge-small-en-v1.5"
+# Timeout augmenté pour laisser Ollama répondre sur de longues requêtes
+ollama_model = os.environ.get("OLLAMA_MODEL", "llama3")
+ollama_timeout = float(os.environ.get("OLLAMA_TIMEOUT", "360.0"))
+Settings.llm = Ollama(
+    model=ollama_model,
+    request_timeout=ollama_timeout
 )
 
-# Remarque : La première exécution téléchargera le modèle 'bge-small-en-v1.5'.
+# 2. Configurer le Modèle d'Embedding (via HuggingFace)
+# Par défaut on choisit un embedder léger et rapide pour la production:
+# - `sentence-transformers/all-MiniLM-L6-v2` (petit, rapide, bon compromis)
+# On permet d'écraser via la variable d'environnement `EMBED_MODEL`.
+embed_model_name = os.environ.get("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+embed_model_kwargs = {"device": os.environ.get("EMBED_DEVICE", "cpu")}
+try:
+    Settings.embed_model = HuggingFaceEmbedding(
+        model_name=embed_model_name,
+        model_kwargs=embed_model_kwargs
+    )
+    print(f"Using embedding model: {embed_model_name} (device={embed_model_kwargs['device']})")
+except TypeError:
+    # Certaines versions de la classe n'acceptent pas model_kwargs
+    Settings.embed_model = HuggingFaceEmbedding(model_name=embed_model_name)
+    print(f"Using embedding model: {embed_model_name} (no model_kwargs support)")
+
 # ---------------------------------------------------------
 
 
