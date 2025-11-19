@@ -3,133 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assistant RAG Vocal by Oussama Abid</title>
+    <title>Assistant RAG Vocal Futuriste</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* ... (Tout votre CSS est ici, c'est parfait) ... */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0f; color: #fff; overflow: hidden; height: 100vh; }
-        #particles-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 100%); }
-        .particle { position: absolute; background: rgba(100, 200, 255, 0.5); border-radius: 50%; animation: float 20s infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0) translateX(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-100vh) translateX(50px); opacity: 0; } }
-        #app-container { position: relative; z-index: 1; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        #header { position: absolute; top: 30px; text-align: center; z-index: 10; }
-        #header h1 { font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; text-transform: uppercase; animation: glow 3s ease-in-out infinite; }
-        @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.5)); } 50% { filter: drop-shadow(0 0 40px rgba(102, 126, 234, 0.8)); } }
-        #header p { margin-top: 10px; color: #a0a0b0; font-size: 0.9rem; letter-spacing: 3px; }
-        #chat-container { width: 100%; max-width: 900px; height: 70vh; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        #chat-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #667eea, #764ba2, transparent); animation: shimmer 3s infinite; }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        #conversation { flex-grow: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
-        #conversation::-webkit-scrollbar { width: 8px; }
-        #conversation::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-        #conversation::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #667eea, #764ba2); border-radius: 10px; }
-        .chat-bubble { padding: 18px 24px; border-radius: 25px; max-width: 75%; word-wrap: break-word; line-height: 1.6; position: relative; animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-        @keyframes slideIn { 0% { opacity: 0; transform: translateY(20px) scale(0.9); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        .user-message { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; align-self: flex-end; border-bottom-right-radius: 8px; }
-        .bot-message { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); color: #f0f0f0; align-self: flex-start; border-bottom-left-radius: 8px; }
-        .chat-bubble strong { display: block; font-size: 0.75rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
-        .loading-bubble { align-self: flex-start; display: flex; gap: 8px; padding: 20px 30px; }
-        .loading-bubble span { width: 12px; height: 12px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out; }
-        .loading-bubble span:nth-child(1) { animation-delay: -0.32s; }
-        .loading-bubble span:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
-        #controls { padding: 20px 30px; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(10px); border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 15px; }
-        .control-button { width: 50px; height: 50px; border-radius: 50%; border: none; cursor: pointer; color: white; font-size: 1.2rem; transition: all 0.3s ease; display: grid; place-items: center; flex-shrink: 0; }
-        .control-button:hover:not(:disabled) { transform: scale(1.1); }
-        #recordButton { width: 65px; height: 65px; font-size: 1.8rem; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); position: relative; box-shadow: 0 0 30px rgba(245, 87, 108, 0.5); }
-        #recordButton::before { content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border-radius: 50%; border: 2px solid transparent; background: linear-gradient(135deg, #f093fb, #f5576c) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; animation: rotateBorder 2s linear infinite; }
-        #recordButton.recording::before { opacity: 1; }
-        @keyframes rotateBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #recordButton:hover { transform: scale(1.1); box-shadow: 0 0 50px rgba(245, 87, 108, 0.8); }
-        #recordButton.recording { animation: recordPulse 1.5s infinite; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); }
-        @keyframes recordPulse { 0%, 100% { box-shadow: 0 0 30px rgba(245, 87, 108, 0.5); } 50% { box-shadow: 0 0 60px rgba(245, 87, 108, 1); } }
-        #stopButton, #resetButton { border: 2px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
-        #resetButton { background: linear-gradient(135deg, #3b82f6, #667eea); border: none; font-size: 1.5rem; }
-        #stopButton:hover:not(:disabled), #resetButton:hover:not(:disabled) { background: rgba(255, 255, 255, 0.2); }
-        #stopButton:disabled { opacity: 0.3; cursor: not-allowed; }
-        
-        /* --- CORRECTION : Remplacement de <form> par <div> --- */
-        #text-input-container {
-            flex-grow: 1;
-            display: flex;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden;
+        :root {
+            --primary: #00f3ff; /* Cyan Cyberpunk */
+            --secondary: #bc13fe; /* Violet Néon */
+            --bg-dark: #05050a;
+            --glass: rgba(10, 15, 30, 0.6);
         }
-        #text-input {
-            flex-grow: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            padding: 15px 20px;
-            color: #fff;
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-        }
-        #text-input::placeholder { color: #777; }
-        #sendButton {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 0 50px 50px 0;
-            border: none;
-            color: white;
-            width: 60px;
-            height: auto;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-            cursor: pointer;
-        }
-        #sendButton:hover { opacity: 0.8; transform: scale(1.05); }
 
-        /* ... (Reste du CSS) ... */
-        #status-bar { width: 100%; max-width: 900px; padding-top: 15px; }
-        #status { color: #a0a0b0; font-size: 0.95rem; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
-        .status-indicator { width: 10px; height: 10px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 10px #4ade80; animation: statusBlink 2s infinite; }
-        @keyframes statusBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.5); transform: scale(0); animation: rippleEffect 0.6s ease-out; pointer-events: none; }
-        @keyframes rippleEffect { to { transform: scale(4); opacity: 0; } }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body { 
+            font-family: 'Rajdhani', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: #fff; 
+            overflow: hidden; 
+            height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- FOND ANIMÉ (GRILLE + PARTICULES) --- */
+        #background-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: 
+                linear-gradient(transparent 0%, rgba(0, 243, 255, 0.05) 50%, transparent 100%),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            animation: bgScan 10s linear infinite;
+            perspective: 500px;
+        }
+        
+        @keyframes bgScan {
+            0% { background-position: 0 0, 0 0, 0 0; }
+            100% { background-position: 0 100%, 0 0, 0 20px; }
+        }
+
+        .particle { position: absolute; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); opacity: 0.6; animation: floatUp 15s infinite linear; }
+        @keyframes floatUp { to { transform: translateY(-100vh) scale(0); opacity: 0; } }
+
+        /* --- CONTENEUR PRINCIPAL --- */
+        #app-container { 
+            position: relative; 
+            z-index: 10; 
+            width: 100%; 
+            max-width: 900px; 
+            height: 85vh; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px;
+        }
+
+        /* --- HEADER --- */
+        #header { text-align: center; margin-bottom: 10px; }
+        #header h1 { 
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 2.2rem; 
+            text-transform: uppercase; 
+            background: linear-gradient(90deg, #fff, var(--primary), #fff); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+            letter-spacing: 4px;
+        }
+        #header p { color: var(--secondary); font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; }
+
+        /* --- ZONE DE CHAT (STYLE HOLOGRAMME) --- */
+        #chat-frame { 
+            flex-grow: 1; 
+            background: var(--glass); 
+            backdrop-filter: blur(15px); 
+            border: 1px solid rgba(0, 243, 255, 0.3); 
+            border-radius: 20px; 
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(0,0,0,0.5);
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            position: relative; 
+        }
+
+        /* Ligne de scan décorative */
+        #chat-frame::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px;
+            background: rgba(0, 243, 255, 0.5);
+            box-shadow: 0 0 15px var(--primary);
+            animation: scanline 4s ease-in-out infinite;
+            opacity: 0.3; pointer-events: none;
+        }
+        @keyframes scanline { 0% { top: -10%; } 100% { top: 110%; } }
+
+        #conversation { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding: 25px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            scroll-behavior: smooth;
+        }
+        #conversation::-webkit-scrollbar { width: 6px; }
+        #conversation::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+        /* --- BULLES DE DIALOGUE --- */
+        .chat-bubble { 
+            padding: 15px 20px; 
+            border-radius: 15px; 
+            max-width: 80%; 
+            line-height: 1.5; 
+            position: relative; 
+            font-size: 1.1rem;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .user-message { 
+            align-self: flex-end; 
+            background: linear-gradient(135deg, rgba(188, 19, 254, 0.2), rgba(188, 19, 254, 0.4));
+            border: 1px solid var(--secondary);
+            color: #fff;
+            border-bottom-right-radius: 2px;
+            box-shadow: 0 0 15px rgba(188, 19, 254, 0.2);
+        }
+
+        .bot-message { 
+            align-self: flex-start; 
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.1), rgba(0, 243, 255, 0.2)); 
+            border: 1px solid var(--primary);
+            color: #d0ffff;
+            border-bottom-left-radius: 2px;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+        }
+
+        .chat-bubble strong { display: block; font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-bottom: 5px; font-family: 'Orbitron'; letter-spacing: 1px; }
+
+        /* --- CONTRÔLES & INPUT --- */
+        #controls-area {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Bouton Micro (Style Réacteur) */
+        #recordButton {
+            width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--primary);
+            background: rgba(0, 243, 255, 0.1); color: var(--primary); cursor: pointer;
+            font-size: 1.5rem; transition: 0.3s; position: relative; display: grid; place-items: center;
+            box-shadow: 0 0 15px var(--primary);
+        }
+        #recordButton:hover { background: var(--primary); color: #000; box-shadow: 0 0 30px var(--primary); transform: scale(1.1); }
+        #recordButton.recording { 
+            border-color: #ff2a2a; color: #ff2a2a; background: rgba(255, 42, 42, 0.1); 
+            box-shadow: 0 0 20px #ff2a2a; animation: pulseRed 1s infinite; 
+        }
+        @keyframes pulseRed { 0% { box-shadow: 0 0 10px #ff2a2a; } 50% { box-shadow: 0 0 30px #ff2a2a; } 100% { box-shadow: 0 0 10px #ff2a2a; } }
+
+        /* Autres boutons */
+        .mini-btn {
+            width: 45px; height: 45px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05); color: #fff; cursor: pointer; transition: 0.3s;
+        }
+        .mini-btn:hover { background: rgba(255,255,255,0.2); }
+        .mini-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Champ Texte Futuriste */
+        #input-wrapper {
+            flex-grow: 1; display: flex; align-items: center;
+            background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px; padding: 5px 15px; transition: 0.3s;
+        }
+        #input-wrapper:focus-within { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
+        
+        #text-input {
+            flex-grow: 1; background: transparent; border: none; color: #fff;
+            padding: 10px; font-family: 'Rajdhani'; font-size: 1.1rem; outline: none;
+        }
+        #sendButton {
+            background: transparent; border: none; color: var(--primary); font-size: 1.4rem; cursor: pointer; transition: 0.3s;
+        }
+        #sendButton:hover { transform: translateX(3px); text-shadow: 0 0 10px var(--primary); }
+
+        /* --- STATUS BAR --- */
+        #status-bar { text-align: center; margin-top: 10px; font-size: 0.8rem; color: rgba(255,255,255,0.5); font-family: 'Orbitron'; letter-spacing: 1px; }
+        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #0f0; margin-right: 5px; box-shadow: 0 0 8px #0f0; }
+
+        /* Animation de chargement */
+        .typing-dots span { display: inline-block; width: 5px; height: 5px; background: var(--primary); border-radius: 50%; margin: 0 2px; animation: wave 1.5s infinite; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes wave { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
     </style>
 </head>
 <body>
 
-    <div id="chat-container">
-        <div id="conversation" role="log">
-            <div class="chat-bubble bot-message">
-                <strong>IA RAG by Oussama Abid 🤖</strong>
-                Bonjour ! Posez-moi une question vocale sur les documents.
-            </div>
-        </div>
+    <div id="background-layer"></div>
+    
+    <div id="app-container">
         
-        <div id="status-bar">
-            <div id="status">
-                <span class="status-indicator"></span>
-                Prêt...
+        <div id="header">
+            <h1>Nexus RAG AI</h1>
+            <p>Système d'analyse vocale avancé</p>
+        </div>
+
+        <div id="chat-frame">
+            <div id="conversation" role="log">
+                <div class="chat-bubble bot-message">
+                    <strong>🤖 SYSTEM</strong>
+                    <p>Initialisation terminée. Je suis prêt à analyser vos données. Parlez ou écrivez.</p>
+                </div>
+            </div>
+
+            <div id="controls-area">
+                <button id="resetButton" class="mini-btn" title="Reset">↻</button>
+                <button id="stopButton" class="mini-btn" disabled title="Stop">■</button>
+                <button id="recordButton" title="Parler">🎤</button>
+                
+                <div id="input-wrapper">
+                    <input type="text" id="text-input" placeholder="Entrez votre commande..." autocomplete="off">
+                    <button id="sendButton">➤</button>
+                </div>
             </div>
         </div>
+
+        <div id="status-bar">
+            <span class="status-dot"></span> <span id="status-text">SYSTÈME EN LIGNE</span>
+        </div>
+
     </div>
 
     <script>
-        // Créer des particules animées
-        function createParticles() {
-            const bg = document.getElementById('particles-bg');
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.width = Math.random() * 4 + 2 + 'px';
-                particle.style.height = particle.style.width;
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-                bg.appendChild(particle);
-            }
+        // --- GESTION DU FOND (PARTICULES) ---
+        const bg = document.getElementById('background-layer');
+        for(let i=0; i<30; i++){
+            let p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random()*100 + '%';
+            p.style.width = p.style.height = (Math.random()*3 + 1) + 'px';
+            p.style.animationDelay = Math.random()*10 + 's';
+            p.style.animationDuration = (Math.random()*10 + 10) + 's';
+            bg.appendChild(p);
         }
-        createParticles();
 
-        // --- Récupération des Éléments ---
+        // --- ÉLÉMENTS DOM ---
         const recordButton = document.getElementById('recordButton');
         const stopButton = document.getElementById('stopButton');
         const resetButton = document.getElementById('resetButton'); 
-        const statusDiv = document.getElementById('status');
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.querySelector('.status-dot');
         const conversationDiv = document.getElementById('conversation');
         const textInput = document.getElementById('text-input');
         const sendButton = document.getElementById('sendButton');
@@ -137,202 +266,150 @@
         let mediaRecorder;
         let audioChunks = [];
 
-        // --- Gestionnaires d'Événements ---
-
-        // Effet Ripple
-        function createRipple(e) {
-            const button = e.currentTarget;
-            const ripple = document.createElement('span');
-            ripple.className = 'ripple';
-            const rect = button.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = e.clientX - rect.left - size / 2 + 'px';
-            ripple.style.top = e.clientY - rect.top - size / 2 + 'px';
-            button.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
+        // --- EFFET MACHINE A ÉCRIRE (TYPING EFFECT) ---
+        function typeWriterEffect(element, text, speed = 20) {
+            let i = 0;
+            element.innerHTML = ""; // On vide avant d'écrire
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    conversationDiv.scrollTop = conversationDiv.scrollHeight; // Scroll auto
+                    setTimeout(type, speed);
+                }
+            }
+            type();
         }
 
-        recordButton.addEventListener('click', createRipple);
-        stopButton.addEventListener('click', createRipple);
-        resetButton.addEventListener('click', createRipple);
-        // Note: On laisse le ripple désactivé sur Send pour l'instant
+        // --- FONCTIONS D'INTERFACE ---
+        function setStatus(msg, state) {
+            statusText.innerText = msg.toUpperCase();
+            statusDot.style.background = state === 'error' ? '#f00' : (state === 'busy' ? '#bc13fe' : '#0f0');
+            statusDot.style.boxShadow = `0 0 10px ${statusDot.style.background}`;
+        }
 
-        // --- Logique (Enregistrement Voix) ---
+        function addMessage(text, speaker, isTemp = false) {
+            const div = document.createElement('div');
+            div.className = `chat-bubble ${speaker === 'user' ? 'user-message' : 'bot-message'}`;
+            if(isTemp) div.classList.add('loading-msg');
+            
+            const title = speaker === 'user' ? '👤 COMMANDER' : '🤖 AI CORE';
+            
+            // Structure de base
+            div.innerHTML = `<strong>${title}</strong><p class="msg-content"></p>`;
+            conversationDiv.appendChild(div);
+            
+            const contentP = div.querySelector('.msg-content');
+            
+            if(speaker === 'bot' && !isTemp) {
+                // Effet machine à écrire pour le bot
+                typeWriterEffect(contentP, text);
+            } else {
+                // Affichage direct pour l'utilisateur ou chargement
+                contentP.innerHTML = text;
+            }
+
+            conversationDiv.scrollTop = conversationDiv.scrollHeight;
+            return div;
+        }
+
+        // --- LOGIQUE AUDIO ---
         recordButton.addEventListener('click', async () => {
             speechSynthesis.cancel();
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
-                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                 mediaRecorder.onstop = sendAudioToServer;
                 mediaRecorder.start();
-                updateStatus("Enregistrement en cours...", "recording");
-                recordButton.disabled = true;
+                
                 recordButton.classList.add('recording');
+                recordButton.disabled = true;
                 stopButton.disabled = false;
+                setStatus("Acquisition Audio...", "busy");
             } catch (err) {
-                console.error("Erreur micro:", err);
-                updateStatus("Erreur: Microphone non autorisé", "error");
+                setStatus("Erreur Micro", "error");
             }
         });
 
         stopButton.addEventListener('click', () => {
-            if (mediaRecorder && mediaRecorder.state === "recording") {
-                mediaRecorder.stop();
-            }
-            updateStatus("Traitement en cours...", "processing");
-            recordButton.disabled = false;
+            if (mediaRecorder?.state === "recording") mediaRecorder.stop();
             recordButton.classList.remove('recording');
+            recordButton.disabled = false;
             stopButton.disabled = true;
         });
 
-        // --- Logique (Envoi Texte) ---
+        // --- LOGIQUE TEXTE ---
         async function handleTextSubmit() {
-            const questionText = textInput.value;
-            if (!questionText.trim()) return;
-
-            speechSynthesis.cancel(); 
-            addMessage(questionText, "user"); // APPEL QUI CAUSAIT LE BUG
-            textInput.value = ""; 
+            const txt = textInput.value.trim();
+            if (!txt) return;
             
-            await sendTextToServer(questionText);
+            speechSynthesis.cancel();
+            addMessage(txt, "user");
+            textInput.value = "";
+            
+            await sendRequest('/query_text', JSON.stringify({ text: txt }), 'application/json');
         }
 
-        sendButton.onclick = handleTextSubmit; // Gère le clic
+        sendButton.onclick = handleTextSubmit;
+        textInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') handleTextSubmit(); });
 
-        textInput.addEventListener('keydown', (e) => { // Gère "Entrée"
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleTextSubmit();
-            }
-        });
-
-        // --- Logique (Reset) ---
+        // --- LOGIQUE RESET ---
         resetButton.addEventListener('click', async () => {
             speechSynthesis.cancel();
-            try {
-                const response = await fetch('/reset_chat');
-                if (response.ok) {
-                    conversationDiv.innerHTML = "";
-                    addMessage("Bonjour ! Posez-moi une question vocale ou écrite. Je suis prêt à vous aider ! 🎯", "bot");
-                    updateStatus("Mémoire réinitialisée. Prêt.", "ready");
-                } else { throw new Error("Échec reset serveur."); }
-            } catch (err) {
-                console.error("Erreur Reset:", err);
-                updateStatus("Erreur de réinitialisation.", "error");
-            }
+            conversationDiv.innerHTML = '';
+            await fetch('/reset_chat');
+            addMessage("Mémoire purgée. Système prêt.", "bot");
         });
 
-        // --- FONCTIONS D'APPEL API ---
-        
+        // --- ENVOI SERVEUR (GÉNÉRIQUE) ---
         async function sendAudioToServer() {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
             const formData = new FormData();
-            formData.append("audio_file", audioBlob, "ma_question.webm");
-            updateStatus("Analyse RAG (Audio) en cours...", "processing");
-            const loadingBubble = addMessage("", "bot", "loading-bubble"); // APPEL CORRECT (avec extraClass)
-            loadingBubble.innerHTML = '<span></span><span></span><span></span>';
-            try {
-                const response = await fetch('/query_voice', { method: 'POST', body: formData });
-                const result = await response.json();
-                if (response.ok) {
-                    addMessage(result.transcribed_text, "user"); // APPEL CORRECT (sans extraClass)
-                    updateMessage(loadingBubble, result.answer_rag, "bot");
-                    parler(result.answer_rag);
-                    updateStatus("Prêt...", "ready");
-                } else { throw new Error(result.error || 'Erreur inconnue'); }
-            } catch (err) { handleApiError(err, loadingBubble); }
+            formData.append("audio_file", blob, "voice.webm");
+            await sendRequest('/query_voice', formData);
         }
 
-        async function sendTextToServer(questionText) {
-            updateStatus("Analyse RAG (Texte) en cours...", "processing");
-            const loadingBubble = addMessage("", "bot", "loading-bubble"); // APPEL CORRECT (avec extraClass)
-            loadingBubble.innerHTML = '<span></span><span></span><span></span>';
-            try {
-                const response = await fetch('/query_text', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: questionText }) 
-                });
-                const result = await response.json();
-                if (response.ok) {
-                    updateMessage(loadingBubble, result.answer_rag, "bot");
-                    parler(result.answer_rag);
-                    updateStatus("Prêt...", "ready");
-                } else { throw new Error(result.error || 'Erreur inconnue'); }
-            } catch (err) { handleApiError(err, loadingBubble); }
-        }
-
-        // --- FONCTIONS D'AIDE ---
-        
-        function handleApiError(err, loadingBubble) {
-            console.error("Erreur API:", err);
-            const errorMsg = `Désolé, une erreur est survenue: ${err.message}`;
-            updateMessage(loadingBubble, errorMsg, "bot", true);
-            parler(errorMsg);
-            updateStatus("Erreur. Prêt à réessayer.", "error");
-        }
-
-        function updateStatus(message, type) {
-            const indicator = statusDiv.querySelector('.status-indicator');
-            statusDiv.innerHTML = `<span class="status-indicator"></span> ${message}`;
-            const newIndicator = statusDiv.querySelector('.status-indicator'); 
-            if (type === "ready") {
-                newIndicator.style.background = "#4ade80";
-                newIndicator.style.boxShadow = "0 0 10px #4ade80";
-            } else if (type === "recording" || type === "error") {
-                newIndicator.style.background = "#ef4444";
-                newIndicator.style.boxShadow = "0 0 10px #ef4444";
-            } else if (type === "processing") {
-                newIndicator.style.background = "#8b5cf6";
-                newIndicator.style.boxShadow = "0 0 10px #8b5cf6";
-            }
-        }
-
-        // *** LA FONCTION CORRIGÉE ***
-        function addMessage(text, speaker, extraClass = "") {
-            const messageType = (speaker === 'user') ? 'user-message' : 'bot-message';
-            const speakerName = (speaker === 'user') ? '🗣️ VOUS' : '🤖 IA RAG';
-            const messageDiv = document.createElement('div');
+        async function sendRequest(url, bodyData, contentType = null) {
+            setStatus("Traitement RAG en cours...", "busy");
             
-            // D'abord, ajoute les classes de base
-            messageDiv.classList.add('chat-bubble', messageType);
+            // Bulle de chargement animée
+            const loadingMsg = addMessage('<span class="typing-dots"><span></span><span></span><span></span></span>', 'bot', true);
             
-            // N'ajoute la classe 'extra' QUE SI elle n'est pas vide
-            if (extraClass) {
-                messageDiv.classList.add(extraClass);
+            try {
+                const opts = { method: 'POST', body: bodyData };
+                if(contentType) opts.headers = { 'Content-Type': contentType };
+                
+                const response = await fetch(url, opts);
+                const data = await response.json();
+                
+                loadingMsg.remove(); // On retire le message de chargement
+
+                if (response.ok) {
+                    if(data.transcribed_text) addMessage(data.transcribed_text, "user"); // Si c'était de l'audio
+                    
+                    addMessage(data.answer_rag, "bot");
+                    parler(data.answer_rag);
+                    setStatus("En attente", "ready");
+                } else {
+                    throw new Error(data.error || 'Erreur inconnue');
+                }
+            } catch (err) {
+                loadingMsg.remove();
+                addMessage("Erreur critique du système: " + err.message, "bot");
+                setStatus("Erreur", "error");
             }
-                        
-            messageDiv.innerHTML = `<strong>${speakerName}</strong><p>${text}</p>`;
-            conversationDiv.appendChild(messageDiv);
-            scrollToBottom();
-            return messageDiv;
         }
 
-        function updateMessage(element, newText, speaker, isError = false) {
-            const speakerName = (speaker === 'user') ? '🗣️ VOUS' : '🤖 IA RAG';
-            element.classList.remove('loading-bubble');
-            if (isError) {
-                element.style.background = 'rgba(239, 68, 68, 0.2)';
-                element.style.borderColor = 'rgba(239, 68, 68, 0.5)';
-            }
-            element.innerHTML = `<strong>${speakerName}</strong><p>${newText}</p>`;
-            scrollToBottom();
-        }
-
-        function scrollToBottom() {
-            conversationDiv.scrollTop = conversationDiv.scrollHeight;
-        }
-
+        // --- TTS (Text to Speech) ---
         function parler(texte) {
-            speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(texte);
-            utterance.lang = 'fr-FR';
-            speechSynthesis.speak(utterance);
+            const u = new SpeechSynthesisUtterance(texte);
+            u.lang = 'fr-FR';
+            u.pitch = 0.9; // Voix un peu plus grave/robotique
+            u.rate = 1.1;
+            speechSynthesis.speak(u);
         }
-
     </script>
 </body>
 </html>

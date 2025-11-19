@@ -1,6 +1,5 @@
 ﻿````plaintext
 #  Projet : Assistant RAG Vocal avec IA Locale
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
 Ce projet est une application web complète (FastAPI + HTML/JS) qui permet à un utilisateur de poser des questions vocalement à une base de documents.
 
