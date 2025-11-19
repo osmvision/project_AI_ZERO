@@ -3,263 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assistant RAG Vocal Futuriste</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>Interface Cyborg RAG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary: #00f3ff; /* Cyan Cyberpunk */
-            --secondary: #bc13fe; /* Violet Néon */
-            --bg-dark: #05050a;
-            --glass: rgba(10, 15, 30, 0.6);
+            --cyborg-blue: #00f2ff;
+            --cyborg-dim: rgba(0, 242, 255, 0.1);
+            --metal-dark: #0a0f14;
+            --metal-light: #1c2530;
+            --alert-red: #ff3333;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body { 
-            font-family: 'Rajdhani', sans-serif; 
-            background-color: var(--bg-dark); 
-            color: #fff; 
+            font-family: 'Share Tech Mono', monospace; 
+            background-color: #000; 
+            color: var(--cyborg-blue); 
             overflow: hidden; 
             height: 100vh; 
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            background-image: 
+                radial-gradient(circle at 50% 50%, #111 0%, #000 100%),
+                linear-gradient(0deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
         }
 
-        /* --- FOND ANIMÉ (GRILLE + PARTICULES) --- */
-        #background-layer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: 
-                linear-gradient(transparent 0%, rgba(0, 243, 255, 0.05) 50%, transparent 100%),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
-            animation: bgScan 10s linear infinite;
-            perspective: 500px;
-        }
-        
-        @keyframes bgScan {
-            0% { background-position: 0 0, 0 0, 0 0; }
-            100% { background-position: 0 100%, 0 0, 0 20px; }
-        }
-
-        .particle { position: absolute; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); opacity: 0.6; animation: floatUp 15s infinite linear; }
-        @keyframes floatUp { to { transform: translateY(-100vh) scale(0); opacity: 0; } }
-
-        /* --- CONTENEUR PRINCIPAL --- */
+        /* --- CADRE PRINCIPAL HUD --- */
         #app-container { 
             position: relative; 
-            z-index: 10; 
             width: 100%; 
             max-width: 900px; 
-            height: 85vh; 
+            height: 90vh; 
             display: flex; 
             flex-direction: column; 
-            gap: 15px;
+            border: 1px solid var(--cyborg-dim);
+            background: rgba(10, 15, 20, 0.85);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.05);
         }
+
+        /* Coins décoratifs style viseur */
+        #app-container::before, #app-container::after {
+            content: ''; position: absolute; width: 20px; height: 20px;
+            border: 2px solid var(--cyborg-blue); transition: 0.3s;
+        }
+        #app-container::before { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        #app-container::after { bottom: -2px; right: -2px; border-left: none; border-top: none; }
 
         /* --- HEADER --- */
-        #header { text-align: center; margin-bottom: 10px; }
+        #header { 
+            padding: 15px; 
+            border-bottom: 2px solid var(--cyborg-blue); 
+            background: var(--cyborg-dim);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         #header h1 { 
             font-family: 'Orbitron', sans-serif; 
-            font-size: 2.2rem; 
-            text-transform: uppercase; 
-            background: linear-gradient(90deg, #fff, var(--primary), #fff); 
-            background-clip: text;
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
-            letter-spacing: 4px;
+            font-size: 1.5rem; 
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--cyborg-blue);
         }
-        #header p { color: var(--secondary); font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; }
+        .sys-info { font-size: 0.8rem; opacity: 0.7; }
 
-        /* --- ZONE DE CHAT (STYLE HOLOGRAMME) --- */
+        /* --- ZONE DE CHAT --- */
         #chat-frame { 
             flex-grow: 1; 
-            background: var(--glass); 
-            backdrop-filter: blur(15px); 
-            border: 1px solid rgba(0, 243, 255, 0.3); 
-            border-radius: 20px; 
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(0,0,0,0.5);
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-            position: relative; 
-        }
-
-        /* Ligne de scan décorative */
-        #chat-frame::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px;
-            background: rgba(0, 243, 255, 0.5);
-            box-shadow: 0 0 15px var(--primary);
-            animation: scanline 4s ease-in-out infinite;
-            opacity: 0.3; pointer-events: none;
-        }
-        @keyframes scanline { 0% { top: -10%; } 100% { top: 110%; } }
-
-        #conversation { 
-            flex-grow: 1; 
             overflow-y: auto; 
-            padding: 25px; 
+            padding: 20px; 
             display: flex; 
             flex-direction: column; 
-            gap: 15px; 
-            scroll-behavior: smooth;
+            gap: 10px; 
+            position: relative;
         }
-        #conversation::-webkit-scrollbar { width: 6px; }
-        #conversation::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+        
+        /* Scanline effect */
+        #chat-frame::before {
+            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
 
-        /* --- BULLES DE DIALOGUE --- */
+        /* Scrollbar technique */
+        #chat-frame::-webkit-scrollbar { width: 8px; background: #000; }
+        #chat-frame::-webkit-scrollbar-thumb { background: var(--cyborg-blue); border: 1px solid #000; }
+
+        /* --- MESSAGES --- */
         .chat-bubble { 
-            padding: 15px 20px; 
-            border-radius: 15px; 
-            max-width: 80%; 
-            line-height: 1.5; 
-            position: relative; 
-            font-size: 1.1rem;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 10px 15px; 
+            max-width: 85%; 
+            font-size: 1rem;
+            position: relative;
+            border-left: 3px solid transparent;
         }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         .user-message { 
             align-self: flex-end; 
-            background: linear-gradient(135deg, rgba(188, 19, 254, 0.2), rgba(188, 19, 254, 0.4));
-            border: 1px solid var(--secondary);
-            color: #fff;
-            border-bottom-right-radius: 2px;
-            box-shadow: 0 0 15px rgba(188, 19, 254, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: 3px solid #fff;
+            color: #eee;
         }
 
         .bot-message { 
             align-self: flex-start; 
-            background: linear-gradient(135deg, rgba(0, 243, 255, 0.1), rgba(0, 243, 255, 0.2)); 
-            border: 1px solid var(--primary);
-            color: #d0ffff;
-            border-bottom-left-radius: 2px;
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid var(--cyborg-dim);
+            border-left: 3px solid var(--cyborg-blue);
+            color: var(--cyborg-blue);
+            font-family: 'Orbitron', sans-serif; /* Police différente pour le robot */
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
         }
 
-        .chat-bubble strong { display: block; font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-bottom: 5px; font-family: 'Orbitron'; letter-spacing: 1px; }
+        .chat-bubble strong { display: block; font-size: 0.7rem; margin-bottom: 5px; opacity: 0.6; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; }
 
-        /* --- CONTRÔLES & INPUT --- */
+        /* --- CONTRÔLES --- */
         #controls-area {
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.4);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-top: 2px solid var(--cyborg-blue);
+            background: #050505;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
         }
 
-        /* Bouton Micro (Style Réacteur) */
+        /* Bouton Micro (Cœur de réacteur) */
         #recordButton {
-            width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--primary);
-            background: rgba(0, 243, 255, 0.1); color: var(--primary); cursor: pointer;
-            font-size: 1.5rem; transition: 0.3s; position: relative; display: grid; place-items: center;
-            box-shadow: 0 0 15px var(--primary);
+            width: 50px; height: 50px; 
+            background: #000; 
+            border: 2px solid var(--cyborg-blue); 
+            color: var(--cyborg-blue);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 10px var(--cyborg-dim);
+            transition: 0.2s;
+            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%); /* Forme angulaire */
         }
-        #recordButton:hover { background: var(--primary); color: #000; box-shadow: 0 0 30px var(--primary); transform: scale(1.1); }
+        #recordButton:hover { background: var(--cyborg-blue); color: #000; }
         #recordButton.recording { 
-            border-color: #ff2a2a; color: #ff2a2a; background: rgba(255, 42, 42, 0.1); 
-            box-shadow: 0 0 20px #ff2a2a; animation: pulseRed 1s infinite; 
+            border-color: var(--alert-red); color: var(--alert-red); 
+            box-shadow: 0 0 20px var(--alert-red);
+            animation: blink 1s infinite;
         }
-        @keyframes pulseRed { 0% { box-shadow: 0 0 10px #ff2a2a; } 50% { box-shadow: 0 0 30px #ff2a2a; } 100% { box-shadow: 0 0 10px #ff2a2a; } }
+        @keyframes blink { 50% { opacity: 0.5; } }
 
-        /* Autres boutons */
         .mini-btn {
-            width: 45px; height: 45px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.05); color: #fff; cursor: pointer; transition: 0.3s;
+            width: 40px; height: 40px; 
+            background: transparent; border: 1px solid #555; color: #555;
+            cursor: pointer; font-family: 'Orbitron';
         }
-        .mini-btn:hover { background: rgba(255,255,255,0.2); }
-        .mini-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .mini-btn:hover:not(:disabled) { border-color: var(--cyborg-blue); color: var(--cyborg-blue); }
+        .mini-btn:disabled { opacity: 0.2; cursor: not-allowed; }
 
-        /* Champ Texte Futuriste */
         #input-wrapper {
             flex-grow: 1; display: flex; align-items: center;
-            background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 10px; padding: 5px 15px; transition: 0.3s;
+            background: rgba(0, 242, 255, 0.05); border: 1px solid var(--cyborg-dim);
+            height: 50px; padding: 0 15px;
         }
-        #input-wrapper:focus-within { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
-        
         #text-input {
             flex-grow: 1; background: transparent; border: none; color: #fff;
-            padding: 10px; font-family: 'Rajdhani'; font-size: 1.1rem; outline: none;
+            font-family: 'Share Tech Mono'; font-size: 1.1rem; outline: none;
         }
         #sendButton {
-            background: transparent; border: none; color: var(--primary); font-size: 1.4rem; cursor: pointer; transition: 0.3s;
+            background: transparent; border: none; color: var(--cyborg-blue); 
+            font-size: 1.2rem; cursor: pointer;
         }
-        #sendButton:hover { transform: translateX(3px); text-shadow: 0 0 10px var(--primary); }
+        #sendButton:hover { text-shadow: 0 0 8px var(--cyborg-blue); }
 
-        /* --- STATUS BAR --- */
-        #status-bar { text-align: center; margin-top: 10px; font-size: 0.8rem; color: rgba(255,255,255,0.5); font-family: 'Orbitron'; letter-spacing: 1px; }
-        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #0f0; margin-right: 5px; box-shadow: 0 0 8px #0f0; }
+        /* --- FOOTER --- */
+        #status-bar { 
+            background: var(--cyborg-blue); color: #000; 
+            font-size: 0.75rem; padding: 2px 10px; 
+            text-align: right; font-weight: bold;
+            text-transform: uppercase;
+        }
 
-        /* Animation de chargement */
-        .typing-dots span { display: inline-block; width: 5px; height: 5px; background: var(--primary); border-radius: 50%; margin: 0 2px; animation: wave 1.5s infinite; }
-        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes wave { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        /* Curseur clignotant à la fin du texte robot */
+        .cursor { display: inline-block; width: 8px; height: 15px; background: var(--cyborg-blue); animation: blink 1s infinite; vertical-align: middle; margin-left: 5px; }
 
     </style>
 </head>
 <body>
 
-    <div id="background-layer"></div>
-    
     <div id="app-container">
-        
         <div id="header">
-            <h1>Nexus RAG AI</h1>
-            <p>Système d'analyse vocale avancé</p>
+            <h1>Unit Zero AI</h1>
+            <div class="sys-info">SYS.VER.3.0 // ONLINE</div>
         </div>
 
         <div id="chat-frame">
             <div id="conversation" role="log">
                 <div class="chat-bubble bot-message">
-                    <strong>🤖 SYSTEM</strong>
-                    <p>Initialisation terminée. Je suis prêt à analyser vos données. Parlez ou écrivez.</p>
+                    <strong>SYSTEM CORE</strong>
+                    <p>Module vocal activé. En attente d'instructions.<span class="cursor"></span></p>
                 </div>
             </div>
+        </div>
 
-            <div id="controls-area">
-                <button id="resetButton" class="mini-btn" title="Reset">↻</button>
-                <button id="stopButton" class="mini-btn" disabled title="Stop">■</button>
-                <button id="recordButton" title="Parler">🎤</button>
-                
-                <div id="input-wrapper">
-                    <input type="text" id="text-input" placeholder="Entrez votre commande..." autocomplete="off">
-                    <button id="sendButton">➤</button>
-                </div>
+        <div id="controls-area">
+            <button id="resetButton" class="mini-btn" title="PURGE">RST</button>
+            <button id="stopButton" class="mini-btn" disabled title="ABORT">STP</button>
+            <button id="recordButton">REC</button>
+            
+            <div id="input-wrapper">
+                <input type="text" id="text-input" placeholder="INPUT COMMAND..." autocomplete="off">
+                <button id="sendButton">>>></button>
             </div>
         </div>
 
         <div id="status-bar">
-            <span class="status-dot"></span> <span id="status-text">SYSTÈME EN LIGNE</span>
+            <span id="status-text">READY</span>
         </div>
-
     </div>
 
     <script>
-        // --- GESTION DU FOND (PARTICULES) ---
-        const bg = document.getElementById('background-layer');
-        for(let i=0; i<30; i++){
-            let p = document.createElement('div');
-            p.className = 'particle';
-            p.style.left = Math.random()*100 + '%';
-            p.style.width = p.style.height = (Math.random()*3 + 1) + 'px';
-            p.style.animationDelay = Math.random()*10 + 's';
-            p.style.animationDuration = (Math.random()*10 + 10) + 's';
-            bg.appendChild(p);
-        }
-
-        // --- ÉLÉMENTS DOM ---
+        // --- CONFIG ---
         const recordButton = document.getElementById('recordButton');
         const stopButton = document.getElementById('stopButton');
         const resetButton = document.getElementById('resetButton'); 
         const statusText = document.getElementById('status-text');
-        const statusDot = document.querySelector('.status-dot');
         const conversationDiv = document.getElementById('conversation');
         const textInput = document.getElementById('text-input');
         const sendButton = document.getElementById('sendButton');
@@ -267,54 +238,57 @@
         let mediaRecorder;
         let audioChunks = [];
 
-        // --- EFFET MACHINE A ÉCRIRE (TYPING EFFECT) ---
-        function typeWriterEffect(element, text, speed = 20) {
+        // --- EFFET TYPING CYBORG ---
+        function typeWriterEffect(element, text, speed = 15) {
+            // Supprime le curseur précédent s'il existe
+            document.querySelectorAll('.cursor').forEach(c => c.remove());
+            
+            element.innerHTML = ""; 
             let i = 0;
-            element.innerHTML = ""; // On vide avant d'écrire
             function type() {
                 if (i < text.length) {
                     element.innerHTML += text.charAt(i);
                     i++;
-                    conversationDiv.scrollTop = conversationDiv.scrollHeight; // Scroll auto
+                    conversationDiv.scrollTop = conversationDiv.scrollHeight;
                     setTimeout(type, speed);
+                } else {
+                    // Ajoute le curseur à la fin
+                    element.innerHTML += '<span class="cursor"></span>';
                 }
             }
             type();
         }
 
-        // --- FONCTIONS D'INTERFACE ---
-        function setStatus(msg, state) {
-            statusText.innerText = msg.toUpperCase();
-            statusDot.style.background = state === 'error' ? '#f00' : (state === 'busy' ? '#bc13fe' : '#0f0');
-            statusDot.style.boxShadow = `0 0 10px ${statusDot.style.background}`;
+        function setStatus(msg, type) {
+            statusText.innerText = type === 'error' ? `⚠️ ${msg}` : msg;
+            statusText.parentElement.style.backgroundColor = type === 'error' ? '#ff3333' : (type === 'busy' ? '#fff' : '#00f2ff');
+            statusText.parentElement.style.color = type === 'busy' ? '#000' : '#000';
         }
 
         function addMessage(text, speaker, isTemp = false) {
             const div = document.createElement('div');
             div.className = `chat-bubble ${speaker === 'user' ? 'user-message' : 'bot-message'}`;
-            if(isTemp) div.classList.add('loading-msg');
+            if(isTemp) div.style.opacity = "0.5"; // Dim loading msg
             
-            const title = speaker === 'user' ? '👤 COMMANDER' : '🤖 AI CORE';
-            
-            // Structure de base
-            div.innerHTML = `<strong>${title}</strong><p class="msg-content"></p>`;
+            const title = speaker === 'user' ? 'USER_INPUT' : 'SYSTEM_RESPONSE';
+            div.innerHTML = `<strong>${title}</strong><div class="content"></div>`;
             conversationDiv.appendChild(div);
             
-            const contentP = div.querySelector('.msg-content');
-            
-            if(speaker === 'bot' && !isTemp) {
-                // Effet machine à écrire pour le bot
-                typeWriterEffect(contentP, text);
-            } else {
-                // Affichage direct pour l'utilisateur ou chargement
-                contentP.innerHTML = text;
-            }
+            const contentDiv = div.querySelector('.content');
 
+            if(speaker === 'bot' && !isTemp) {
+                typeWriterEffect(contentDiv, text);
+            } else {
+                contentDiv.innerHTML = text;
+            }
+            
             conversationDiv.scrollTop = conversationDiv.scrollHeight;
             return div;
         }
 
-        // --- LOGIQUE AUDIO ---
+        // --- LOGIQUE (IDENTIQUE À AVANT POUR QUE ÇA MARCHE) ---
+        
+        // 1. Audio
         recordButton.addEventListener('click', async () => {
             speechSynthesis.cancel();
             try {
@@ -328,9 +302,9 @@
                 recordButton.classList.add('recording');
                 recordButton.disabled = true;
                 stopButton.disabled = false;
-                setStatus("Acquisition Audio...", "busy");
+                setStatus("RECORDING...", "busy");
             } catch (err) {
-                setStatus("Erreur Micro", "error");
+                setStatus("MIC ERROR", "error");
             }
         });
 
@@ -341,7 +315,7 @@
             stopButton.disabled = true;
         });
 
-        // --- LOGIQUE TEXTE ---
+        // 2. Texte
         async function handleTextSubmit() {
             const txt = textInput.value.trim();
             if (!txt) return;
@@ -352,19 +326,18 @@
             
             await sendRequest('/query_text', JSON.stringify({ text: txt }), 'application/json');
         }
-
         sendButton.onclick = handleTextSubmit;
         textInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') handleTextSubmit(); });
 
-        // --- LOGIQUE RESET ---
+        // 3. Reset
         resetButton.addEventListener('click', async () => {
             speechSynthesis.cancel();
             conversationDiv.innerHTML = '';
             await fetch('/reset_chat');
-            addMessage("Mémoire purgée. Système prêt.", "bot");
+            addMessage("MEMORY PURGED.", "bot");
         });
 
-        // --- ENVOI SERVEUR (GÉNÉRIQUE) ---
+        // 4. Envoi Réseau (Sécurisé)
         async function sendAudioToServer() {
             const blob = new Blob(audioChunks, { type: 'audio/webm' });
             const formData = new FormData();
@@ -372,12 +345,9 @@
             await sendRequest('/query_voice', formData);
         }
 
-        // --- PARTIE MODIFIÉE (INVISIBLE) POUR ÉVITER LE CRASH ---
         async function sendRequest(url, bodyData, contentType = null) {
-            setStatus("Traitement RAG en cours...", "busy");
-            
-            // Bulle de chargement animée
-            const loadingMsg = addMessage('<span class="typing-dots"><span></span><span></span><span></span></span>', 'bot', true);
+            setStatus("PROCESSING...", "busy");
+            const loadingDiv = addMessage("CALCULATING...", 'bot', true);
             
             try {
                 const opts = { method: 'POST', body: bodyData };
@@ -385,44 +355,39 @@
                 
                 const response = await fetch(url, opts);
 
-                // Protection contre le crash JSON
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Erreur Serveur (${response.status}): ${errorText.substring(0, 50)}...`);
+                    const errTxt = await response.text();
+                    throw new Error(`SERVER ERROR ${response.status}`);
                 }
 
-                // On vérifie si le serveur renvoie bien du JSON
-                const contentTypeHeader = response.headers.get("content-type");
-                if (!contentTypeHeader || !contentTypeHeader.includes("application/json")) {
-                    const text = await response.text();
-                    throw new Error("Erreur: Le serveur n'est pas prêt ou a renvoyé une page HTML.");
+                const cType = response.headers.get("content-type");
+                if (!cType || !cType.includes("json")) {
+                    throw new Error("INVALID DATA (HTML RECEIVED)");
                 }
 
                 const data = await response.json();
-                
-                loadingMsg.remove(); // On retire le message de chargement
+                loadingDiv.remove();
 
-                if(data.transcribed_text) addMessage(data.transcribed_text, "user"); // Si c'était de l'audio
+                if(data.transcribed_text) addMessage(data.transcribed_text, "user");
                 
                 addMessage(data.answer_rag, "bot");
                 parler(data.answer_rag);
-                setStatus("En attente", "ready");
+                setStatus("IDLE", "ready");
 
             } catch (err) {
-                loadingMsg.remove();
+                loadingDiv.remove();
                 console.error(err);
-                // Affiche l'erreur dans le style du chat au lieu de planter
-                addMessage("⚠️ " + err.message, "bot");
-                setStatus("Erreur", "error");
+                addMessage(`ERR: ${err.message}`, "bot");
+                setStatus("SYSTEM FAILURE", "error");
             }
         }
 
-        // --- TTS (Text to Speech) ---
+        // 5. TTS Robotique
         function parler(texte) {
             const u = new SpeechSynthesisUtterance(texte);
             u.lang = 'fr-FR';
-            u.pitch = 0.9; 
-            u.rate = 1.1;
+            u.pitch = 0.5; // Très grave
+            u.rate = 1.2;  // Rapide
             speechSynthesis.speak(u);
         }
     </script>
