@@ -1,26 +1,15 @@
-﻿---
-title: Project Zero AI
+---
+title: Assistant RAG Vocal
 emoji: 🚀
 colorFrom: blue
-colorTo: green
+colorTo: purple
 sdk: docker
-pinned: false
+app_port: 7860
 ---
 
-# Project Zero AI - Moteur RAG Vocal
 
-Ce projet est une application de Question/Réponse basée sur la récupération d'informations (RAG) qui accepte des requêtes vocales.
-
-## Architecture
-- **API**: FastAPI
-- **Speech-to-Text**: `openai-whisper`
-- **Moteur RAG**: `LlamaIndex` avec `Ollama` et `llama3`
-- **Déploiement**: Docker
-
-Le projet est orchestré par un script `boot.sh` qui initialise le serveur Ollama avant de lancer l'application FastAPI.
-
-````plaintext
-#  Projet : Assistant RAG Vocal avec IA Locale
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+# 🚀 Projet : Assistant RAG Vocal avec IA Locale
 
 Ce projet est une application web complète (FastAPI + HTML/JS) qui permet à un utilisateur de poser des questions vocalement à une base de documents.
 
@@ -35,7 +24,7 @@ L'ensemble du pipeline (S2T, Embedding, LLM) tourne localement.
 * **Modèle d'Embedding :** `HuggingFace (BAAI/bge-small-en-v1.5)`.
 * **LLM (Cerveau) :** `Ollama (llama3)`.
 
-##  Installation et Lancement
+## 🛠️ Installation et Lancement (Local)
 
 1.  **Prérequis :**
     * Installer Python 3.11 (64-bit).
@@ -58,18 +47,6 @@ L'ensemble du pipeline (S2T, Embedding, LLM) tourne localement.
 4.  **Ajouter les documents :**
     * Placez vos fichiers `.txt` ou `.pdf` dans le dossier `/data`.
 
-7.  **Pré-télécharger les modèles Hugging Face (optionnel, recommandé pour production)**
-        - Exportez votre token (Windows PowerShell) :
-            ```powershell
-            $env:HUGGINGFACE_HUB_TOKEN = 'votre_token_ici'
-            $env:EMBED_MODEL = 'BAAI/bge-small-en-v1.5'  # ou 'sentence-transformers/all-MiniLM-L6-v2'
-            ```
-        - Puis lancez le script de pré-fetch :
-            ```powershell
-            python scripts/prefetch_hf.py
-            ```
-        - Cela évitera des téléchargements au runtime et réduit les erreurs sur des runners limités.
-
 5.  **Lancer le serveur :**
     ```bash
     uvicorn src.main:app --reload
@@ -77,5 +54,3 @@ L'ensemble du pipeline (S2T, Embedding, LLM) tourne localement.
 
 6.  **Accéder à l'application :**
     * Ouvrez `http://127.0.0.1:8000/` dans votre navigateur.
-
-````
