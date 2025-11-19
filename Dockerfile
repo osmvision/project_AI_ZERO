@@ -26,12 +26,82 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
 
+# 7. Télécharger le modèle d'embedding pendant le build
+# Le modèle est spécifié dans le README : BAAI/bge-small-en-v1.5
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-small-en-v1.5')"
+
 # 7. Copie de TOUT votre projet dans le conteneur
 COPY . .
 
 # 8. Copier le cache HF pré-téléchargé (préparé par le workflow) si présent
 # Le workflow doit créer un dossier `hf_cache/` dans le contexte de build.
-COPY hf_cache /root/.cache/huggingface/
+# Cette ligne est supprimée car nous téléchargeons le modèle directement dans l'étape précédente.
+# COPY hf_cache /root/.cache/huggingface/
+
+# 8. Rendre le script de démarrage exécutable
+COPY boot.sh /usr/local/bin/boot.sh
+RUN chmod +x /usr/local/bin/boot.sh
+
+# 9. Commande de démarrage (Hugging Face s'attend au port 7860)
+EXPOSE 7860
+CMD ["/usr/local/bin/boot.sh"]
+# 1. Image de base : Python standard (pas NVIDIA)
+FROM python:3.11-slim-bookworm
+
+# 2. Variables d'environnement
+ENV DEBIAN_FRONTEND=noninteractive
+ENV OLLAMA_HOST="0.0.0.0"
+
+# Optional build arg to prefetch HuggingFace models during image build
+ARG HUGGINGFACE_HUB_TOKEN
+ENV HUGGINGFACE_HUB_TOKEN=${HUGGINGFACE_HUB_TOKEN}
+
+# 3. Installation des dépendances système (Python, pip, ffmpeg pour Whisper)
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    ffmpeg \
+    curl \
+    && apt-get clean
+
+# 4. Installation d'Ollama (version CPU)
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
+# 5. Création du répertoire de travail
+WORKDIR /app
+
+# 6. Copie des requirements et installation
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
+
+# Install system packages commonly required by ML libs
+RUN apt-get update && apt-get install -y \
+    git \
+    build-essential \
+    libsndfile1 \
+    libgomp1 \
+    && apt-get clean || true
+
+# 7. Copie des requirements et installation
+# (pip install déjà fait plus haut)
+
+# Default embedding model (lightweight) — override with build/run env if you prefer
+ARG EMBED_MODEL="sentence-transformers/all-MiniLM-L6-v2"
+ENV EMBED_MODEL=${EMBED_MODEL}
+
+# Note: downloading large HF models during image build can make the build heavy and unreliable.
+# Recommended options:
+# - Use CI to prefetch HF cache into a `hf_cache/` directory and uncomment the COPY below to include it in the image.
+#   Example (only enable when `hf_cache/` is present in build context):
+#     COPY hf_cache /root/.cache/huggingface/
+# - Or set `EMBED_MODEL` to a smaller model (default above) and allow runtime download on first run.
+
+# 7. Copie de TOUT votre projet dans le conteneur
+COPY . .
+
+# 8. Copier le cache HF pré-téléchargé (préparé par le workflow) si présent
+# Le workflow doit créer un dossier `hf_cache/` dans le contexte de build.
+# Cette ligne est supprimée car nous téléchargeons le modèle directement dans l'étape précédente.
+# COPY hf_cache /root/.cache/huggingface/
 
 # 8. Rendre le script de démarrage exécutable
 COPY boot.sh /usr/local/bin/boot.sh
