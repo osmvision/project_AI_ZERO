@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  zeroai:
+    image: ${IMAGE:-ghcr.io/OWNER/zeroai:latest}
+    restart: unless-stopped
+    ports:
+      - "7860:7860"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - EMBED_MODEL=${EMBED_MODEL}
+      - EMBED_DEVICE=${EMBED_DEVICE:-cpu}
+      - S2T_MODEL=${S2T_MODEL:-tiny}
+      - HUGGINGFACE_HUB_TOKEN=${HUGGINGFACE_HUB_TOKEN}
+    volumes:
+      - ./storage:/app/storage
+      - ./data:/app/data
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3

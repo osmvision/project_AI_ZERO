@@ -46,6 +46,18 @@ L'ensemble du pipeline (S2T, Embedding, LLM) tourne localement.
 4.  **Ajouter les documents :**
     * Placez vos fichiers `.txt` ou `.pdf` dans le dossier `/data`.
 
+7.  **Pré-télécharger les modèles Hugging Face (optionnel, recommandé pour production)**
+        - Exportez votre token (Windows PowerShell) :
+            ```powershell
+            $env:HUGGINGFACE_HUB_TOKEN = 'votre_token_ici'
+            $env:EMBED_MODEL = 'BAAI/bge-small-en-v1.5'  # ou 'sentence-transformers/all-MiniLM-L6-v2'
+            ```
+        - Puis lancez le script de pré-fetch :
+            ```powershell
+            python scripts/prefetch_hf.py
+            ```
+        - Cela évitera des téléchargements au runtime et réduit les erreurs sur des runners limités.
+
 5.  **Lancer le serveur :**
     ```bash
     uvicorn src.main:app --reload

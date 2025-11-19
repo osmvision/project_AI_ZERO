@@ -8,3 +8,17 @@ llama-index-embeddings-huggingface
 sentence-transformers
 torch
 torchaudio
+transformers
+huggingface-hub
+accelerate
+fastapi
+uvicorn[standard]
+python-multipart
+openai-whisper
+llama-index-core
+llama-index-llms-ollama
+llama-index-embeddings-huggingface
+sentence-transformers
+torch
+torchaudio
+flask-cors
