@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 import shutil
 from pathlib import Path
 from fastapi.responses import FileResponse
-from pydantic import BaseModel  # &lt;-- NOUVEL IMPORT
+from pydantic import BaseModel  # <-- NOUVEL IMPORT
 
 # Importe les fonctions des autres fichiers
 from .rag_engine import setup_rag_engine

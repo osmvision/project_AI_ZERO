@@ -372,6 +372,7 @@
             await sendRequest('/query_voice', formData);
         }
 
+        // --- C'EST ICI QUE J'AI CORRIGÉ LE BUG ---
         async function sendRequest(url, bodyData, contentType = null) {
             setStatus("Traitement RAG en cours...", "busy");
             
@@ -383,22 +384,39 @@
                 if(contentType) opts.headers = { 'Content-Type': contentType };
                 
                 const response = await fetch(url, opts);
+
+                // --- NOUVELLE LOGIQUE DE SÉCURITÉ ---
+                // On vérifie d'abord si la réponse est valide avant de parser le JSON
+                if (!response.ok) {
+                    // Si c'est une erreur (500, 404), on essaie de lire le texte de l'erreur
+                    const errorText = await response.text();
+                    throw new Error(`Erreur Serveur (${response.status}): ${errorText.substring(0, 100)}...`);
+                }
+
+                // On vérifie que le contenu est bien du JSON
+                const contentTypeHeader = response.headers.get("content-type");
+                if (!contentTypeHeader || !contentTypeHeader.includes("application/json")) {
+                     // Si le serveur renvoie du HTML au lieu de JSON (le bug "Unexpected token <")
+                    const text = await response.text();
+                    console.error("Réponse HTML reçue au lieu de JSON:", text);
+                    throw new Error("Le serveur a renvoyé une page HTML (Erreur critique ou démarrage en cours)");
+                }
+
+                // Maintenant c'est sûr, on peut parser
                 const data = await response.json();
                 
                 loadingMsg.remove(); // On retire le message de chargement
 
-                if (response.ok) {
-                    if(data.transcribed_text) addMessage(data.transcribed_text, "user"); // Si c'était de l'audio
-                    
-                    addMessage(data.answer_rag, "bot");
-                    parler(data.answer_rag);
-                    setStatus("En attente", "ready");
-                } else {
-                    throw new Error(data.error || 'Erreur inconnue');
-                }
+                if(data.transcribed_text) addMessage(data.transcribed_text, "user"); // Si c'était de l'audio
+                
+                addMessage(data.answer_rag, "bot");
+                parler(data.answer_rag);
+                setStatus("En attente", "ready");
+
             } catch (err) {
                 loadingMsg.remove();
-                addMessage("Erreur critique du système: " + err.message, "bot");
+                console.error(err);
+                addMessage("⚠️ Erreur : " + err.message, "bot");
                 setStatus("Erreur", "error");
             }
         }
@@ -407,7 +425,7 @@
         function parler(texte) {
             const u = new SpeechSynthesisUtterance(texte);
             u.lang = 'fr-FR';
-            u.pitch = 0.9; // Voix un peu plus grave/robotique
+            u.pitch = 0.9; 
             u.rate = 1.1;
             speechSynthesis.speak(u);
         }
