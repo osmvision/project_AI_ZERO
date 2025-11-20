@@ -1,44 +1,65 @@
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, Settings
+from llama_index.core import StorageContext, load_index_from_storage
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 import os
+from pathlib import Path
+
+# --- CONFIGURATION ---
+BASE_DIR = Path(__file__).resolve().parent.parent
+# On utilise /tmp pour éviter les erreurs de permission sur Hugging Face
+STORAGE_DIR = Path("/tmp/storage") 
+DATA_DIR = BASE_DIR / "data"
 
 def setup_rag_engine():
-    print("🛠️ Initialisation du RAG Engine...")
+    print("🛠️ Configuration RAG (Mode Éco-Mémoire)...")
 
-    # 1. Configuration du modèle d'Embedding (Vectorisation)
-    # On utilise le même modèle que celui pré-téléchargé dans le Dockerfile
+    # 1. EMBEDDING (Vecteurs)
+    print("   -> Chargement Embedding BAAI/bge-small-en-v1.5...")
     Settings.embed_model = HuggingFaceEmbedding(
-        model_name="BAAI/bge-small-en-v1.5"
+        model_name="BAAI/bge-small-en-v1.5",
+        cache_folder="/app/hf_cache"
     )
 
-    # 2. Configuration du LLM (Cerveau)
-    # CORRECTION ICI : On force l'utilisation de 'phi3' pour correspondre au boot.sh
+    # 2. LLM (Cerveau)
+    # CRITIQUE: On force context_window=2048 pour ne pas exploser la RAM
+    print("   -> Connexion à Ollama (phi3) avec limite 2k...")
     Settings.llm = Ollama(
         model="phi3", 
-        request_timeout=300.0
+        request_timeout=300.0,
+        context_window=2048,  # <--- LA CLÉ EST ICI
+        additional_kwargs={"num_ctx": 2048} # Double sécurité
     )
 
-    # 3. Chargement des documents
-    # On vérifie si le dossier data existe, sinon on crée un document vide pour éviter le crash
-    data_path = "./data"
-    if not os.path.exists(data_path):
-        os.makedirs(data_path)
-        
-    # Chargement des données
-    print(f"📂 Chargement des documents depuis {data_path}...")
-    try:
-        documents = SimpleDirectoryReader(data_path).load_data()
-    except Exception as e:
-        print(f"⚠️ Attention: Aucun document trouvé ou erreur de lecture: {e}")
-        documents = []
+    # 3. INDEXATION
+    if not STORAGE_DIR.exists():
+        os.makedirs(STORAGE_DIR)
 
-    # Si aucun document, on crée un index vide, sinon on indexe les fichiers
+    if (STORAGE_DIR / "docstore.json").exists():
+        print("✅ Index existant trouvé. Chargement...")
+        try:
+            storage_context = StorageContext.from_defaults(persist_dir=str(STORAGE_DIR))
+            return load_index_from_storage(storage_context).as_chat_engine()
+        except Exception:
+            print("⚠️ Index corrompu, reconstruction...")
+
+    if not DATA_DIR.exists():
+        os.makedirs(DATA_DIR)
+        documents = []
+    else:
+        try:
+            documents = SimpleDirectoryReader(str(DATA_DIR)).load_data()
+        except Exception:
+            documents = []
+
     if not documents:
         index = VectorStoreIndex.from_documents([])
     else:
         index = VectorStoreIndex.from_documents(documents)
+        try:
+            index.storage_context.persist(persist_dir=str(STORAGE_DIR))
+        except Exception:
+            pass
 
-    # 4. Création du moteur de chat
     print("✅ RAG Engine prêt !")
     return index.as_chat_engine()
